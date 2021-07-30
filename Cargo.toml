@@ -1,0 +1,19 @@
+[package]
+name = "link-preview"
+version = "0.1.0"
+authors = ["Esteban Borai <estebanborai@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+reqwest = { version = "0.11.4", optional = true }
+scraper = "0.12.0"
+thiserror = "1.0.26"
+url = "2.2.2"
+
+[dev-dependencies]
+tokio = { version = "1.9.0", features = ["rt", "macros"] }
+
+[features]
+fetch = ["reqwest"]
