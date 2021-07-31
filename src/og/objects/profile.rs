@@ -1,8 +1,8 @@
 use std::str::FromStr;
 use std::string::ToString;
 
-use crate::og::error::OpenGraphError;
 use crate::og::OpenGraphTag;
+use crate::og::error::OpenGraphError;
 
 pub enum Gender {
     Female,
@@ -41,5 +41,5 @@ pub struct Profile {
     first_name: Option<String>,
     last_name: Option<String>,
     username: Option<String>,
-    gender: Option<String>,
+    gender: Option<Gender>,
 }

@@ -25,6 +25,7 @@ pub struct OpenGraph {
 }
 
 /// OpenGraphTag meta tags collection
+#[derive(Debug)]
 pub enum OpenGraphTag {
     /// Represents the "og:title" OpenGraph meta tag.
     ///
@@ -33,8 +34,6 @@ pub enum OpenGraphTag {
     Title,
     /// Represents the "og:url" OpenGraph meta tag
     Url,
-    /// Represents the "og:image" OpenGraph meta tag
-    Image,
     /// Represents the "og:type" OpenGraph meta tag
     ///
     /// The type of your object, e.g., "video.movie". Depending on the type
@@ -44,6 +43,8 @@ pub enum OpenGraphTag {
     Description,
     /// Represents the "og:locale" OpenGraph meta tag
     Locale,
+    /// Represents the "og:image" OpenGraph meta tag
+    Image,
     /// Represents the "og:image:height" OpenGraph meta tag
     ImageHeight,
     /// Represents the "og:image:width" OpenGraph meta tag
@@ -56,7 +57,7 @@ pub enum OpenGraphTag {
     ProfileGender,
 }
 
-impl fmt::Debug for OpenGraphTag {
+impl fmt::Display for OpenGraphTag {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(self.str())
     }
@@ -67,10 +68,10 @@ impl OpenGraphTag {
         match self {
             OpenGraphTag::Title => "title",
             OpenGraphTag::Url => "url",
-            OpenGraphTag::Image => "image",
-            OpenGraphTag::Type => "type",
             OpenGraphTag::Description => "description",
+            OpenGraphTag::Type => "type",
             OpenGraphTag::Locale => "locale",
+            OpenGraphTag::Image => "image",
             OpenGraphTag::ImageHeight => "image:height",
             OpenGraphTag::ImageWidth => "image:width",
             OpenGraphTag::SiteName => "site_name",

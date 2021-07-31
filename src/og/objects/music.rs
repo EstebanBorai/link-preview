@@ -4,30 +4,31 @@
 //!
 //! # References
 //! - https://ogp.me/#type_music
+use super::profile::Profile;
 
 pub struct Album {
-    pub song: Box<Song>,
+    pub song: Option<Box<Song>>,
 }
 
 pub struct Song {
     /// `music:duration` Open Graph's tag.
     ///
     /// The song's length in seconds.
-    duration: u64,
+    duration: Option<u64>,
     /// `music:album` Open Graph's tag.
     ///
     /// The album this song is from.
-    albums: Vec<Album>,
-    disc: u32,
-    track: u32,
-    musician: u32,
-}
-
-/// In order for your object to be represented within the graph, you need to
-/// specify its type. This is done using the og:type property.
-pub enum Music {
-    Song,
-    Album,
-    Playlist,
-    RadioStation,
+    albums: Option<Vec<Album>>,
+    /// `music:album` Open Graph's tag.
+    ///
+    /// The album this song is from.
+    disc: Option<u32>,
+    /// `music:album` Open Graph's tag.
+    ///
+    /// The album this song is from.
+    track: Option<u32>,
+    /// `music:album` Open Graph's tag.
+    ///
+    /// The album this song is from.
+    musician: Option<Profile>,
 }
