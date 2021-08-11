@@ -1,6 +1,6 @@
 [package]
 name = "link-preview"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Esteban Borai <estebanborai@gmail.com>"]
 edition = "2018"
 description = "Retrieve website metadata such as title, description, preview image, author and more from OpenGraph, Google, Schema.org and Twitter compliant sites"
@@ -21,4 +21,5 @@ url = "2.2.2"
 tokio = { version = "1.9.0", features = ["rt", "macros"] }
 
 [features]
+# Provide fetch capabilities
 fetch = ["reqwest"]

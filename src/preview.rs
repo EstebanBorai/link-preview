@@ -1,6 +1,3 @@
-#[cfg(feature = "fetch")]
-use reqwest::get;
-
 use scraper::Html;
 use std::str::FromStr;
 use std::string::FromUtf8Error;
@@ -16,6 +13,9 @@ use crate::twitter::{find_twitter_tag, TwitterMetaTag};
 pub enum Error {
     #[error("The provided byte slice contains invalid UTF-8 characters")]
     InvalidUtf8(FromUtf8Error),
+    #[cfg(feature = "fetch")]
+    #[error("Failed to fetch {0}. An error ocurred: {1}")]
+    FailedToFetch(String, reqwest::Error),
 }
 
 #[derive(Debug)]
@@ -27,15 +27,6 @@ pub struct LinkPreview {
 }
 
 impl LinkPreview {
-    /// Fetches the provided URL and retrieves an instance of `LinkPreview`
-    #[cfg(feature = "fetch")]
-    pub async fn fetch(url: &str) -> Self {
-        let resp = get(url).await.unwrap();
-        let html = resp.text().await;
-
-        LinkPreview::from_str(html)
-    }
-
     /// Attempts to find the description of the page in the following order:
     ///
     /// - Document's `<link rel="canonical" /> element's `href` attribute
