@@ -13,12 +13,9 @@ use crate::twitter::{find_twitter_tag, TwitterMetaTag};
 pub enum Error {
     #[error("The provided byte slice contains invalid UTF-8 characters")]
     InvalidUtf8(FromUtf8Error),
-    #[cfg(feature = "fetch")]
-    #[error("Failed to fetch {0}. An error ocurred: {1}")]
-    FailedToFetch(String, reqwest::Error),
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct LinkPreview {
     pub title: Option<String>,
     pub description: Option<String>,
@@ -27,17 +24,35 @@ pub struct LinkPreview {
 }
 
 impl LinkPreview {
+    /// Retrieves the `String` representation of `domain` `Url` instance
+    pub fn domain_str(&self) -> Option<String> {
+        if let Some(domain) = self.domain.clone() {
+            return Some(domain.to_string());
+        }
+
+        None
+    }
+
+    /// Retrieves the `String` representation of `image_url` `Url` instance
+    pub fn image_url_str(&self) -> Option<String> {
+        if let Some(image_url) = self.image_url.clone() {
+            return Some(image_url.to_string());
+        }
+
+        None
+    }
+
     /// Attempts to find the description of the page in the following order:
     ///
     /// - Document's `<link rel="canonical" /> element's `href` attribute
     /// - OpenGraphTag's image meta tag (`og:image`)
-    pub fn find_first_domain(html: &Html) -> Option<String> {
+    pub fn find_first_domain(html: &Html) -> Option<Url> {
         if let Some(domain) = find_link(html, "canonical") {
-            return Some(domain);
+            return Url::parse(&domain).ok();
         }
 
         if let Some(domain) = find_og_tag(html, OpenGraphTag::Url) {
-            return Some(domain);
+            return Url::parse(&domain).ok();
         }
 
         None
@@ -49,21 +64,21 @@ impl LinkPreview {
     /// - Document's `<link rel="image_url" /> element's `href` attribute
     /// - Twitter Card's image meta tag (`twitter:image`)
     /// - Schema.org image meta tag (`image`)
-    pub fn find_first_image_url(html: &Html) -> Option<String> {
+    pub fn find_first_image_url(html: &Html) -> Option<Url> {
         if let Some(image_url) = find_og_tag(html, OpenGraphTag::Image) {
-            return Some(image_url);
+            return Url::parse(&image_url).ok();
         }
 
         if let Some(image_url) = find_link(html, "image_src") {
-            return Some(image_url);
+            return Url::parse(&image_url).ok();
         }
 
         if let Some(image_url) = find_schema_tag(html, SchemaMetaTag::Image) {
-            return Some(image_url);
+            return Url::parse(&image_url).ok();
         }
 
         if let Some(image_url) = find_twitter_tag(html, TwitterMetaTag::Image) {
-            return Some(image_url);
+            return Url::parse(&image_url).ok();
         }
 
         None
@@ -139,10 +154,8 @@ impl LinkPreview {
 
 impl From<Html> for LinkPreview {
     fn from(html: Html) -> Self {
-        let image_url: Option<Url> =
-            LinkPreview::find_first_image_url(&html).and_then(|url| url.parse::<Url>().ok());
-        let domain: Option<Url> =
-            LinkPreview::find_first_domain(&html).and_then(|url| url.parse::<Url>().ok());
+        let image_url: Option<Url> = LinkPreview::find_first_image_url(&html);
+        let domain = LinkPreview::find_first_domain(&html);
 
         LinkPreview {
             title: LinkPreview::find_first_title(&html),
@@ -155,10 +168,8 @@ impl From<Html> for LinkPreview {
 
 impl From<&Html> for LinkPreview {
     fn from(html: &Html) -> Self {
-        let image_url: Option<Url> =
-            LinkPreview::find_first_image_url(html).and_then(|url| url.parse::<Url>().ok());
-        let domain: Option<Url> =
-            LinkPreview::find_first_domain(html).and_then(|url| url.parse::<Url>().ok());
+        let image_url: Option<Url> = LinkPreview::find_first_image_url(html);
+        let domain: Option<Url> = LinkPreview::find_first_domain(html);
 
         LinkPreview {
             title: LinkPreview::find_first_title(html),
@@ -174,10 +185,8 @@ impl FromStr for LinkPreview {
 
     fn from_str(html: &str) -> Result<Self, Self::Err> {
         let html = Html::parse_document(html);
-        let image_url: Option<Url> =
-            LinkPreview::find_first_image_url(&html).and_then(|url| url.parse::<Url>().ok());
-        let domain: Option<Url> =
-            LinkPreview::find_first_domain(&html).and_then(|url| url.parse::<Url>().ok());
+        let image_url: Option<Url> = LinkPreview::find_first_image_url(&html);
+        let domain: Option<Url> = LinkPreview::find_first_domain(&html);
 
         Ok(LinkPreview {
             title: LinkPreview::find_first_title(&html),
@@ -264,10 +273,11 @@ mod tests {
     #[test]
     fn finds_first_image_url() {
         let html = html_from_bytes(FULL_FEATURED_HTML).unwrap();
-        let title = LinkPreview::find_first_image_url(&html);
+        let image_url: Option<String> =
+            LinkPreview::find_first_image_url(&html).and_then(|url| Some(url.to_string()));
 
         assert_eq!(
-            title.unwrap(),
+            image_url.unwrap(),
             "https://www.apple.com/ac/structured-data/images/open_graph_logo.png?201809210816"
         );
     }
@@ -275,8 +285,8 @@ mod tests {
     #[test]
     fn finds_first_domain() {
         let html = html_from_bytes(FULL_FEATURED_HTML).unwrap();
-        let title = LinkPreview::find_first_domain(&html);
+        let domain = LinkPreview::find_first_domain(&html).and_then(|url| Some(url.to_string()));
 
-        assert_eq!(title.unwrap(), "https://en.wikipedia.com");
+        assert_eq!(domain.unwrap(), "https://en.wikipedia.com");
     }
 }
