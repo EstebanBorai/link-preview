@@ -1,6 +1,6 @@
 [package]
 name = "link-preview"
-version = "0.0.2"
+version = "0.0.3"
 authors = ["Esteban Borai <estebanborai@gmail.com>"]
 edition = "2018"
 description = "Retrieve website metadata such as title, description, preview image, author and more from OpenGraph, Google, Schema.org and Twitter compliant sites"
@@ -12,6 +12,7 @@ categories = ["web-programming"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+regex = "1.5.4"
 reqwest = { version = "0.11.4", optional = true }
 scraper = "0.12.0"
 thiserror = "1.0.26"
