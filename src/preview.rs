@@ -19,20 +19,11 @@ pub enum Error {
 pub struct LinkPreview {
     pub title: Option<String>,
     pub description: Option<String>,
-    pub domain: Option<Url>,
+    pub domain: Option<String>,
     pub image_url: Option<Url>,
 }
 
 impl LinkPreview {
-    /// Retrieves the `String` representation of `domain` `Url` instance
-    pub fn domain_str(&self) -> Option<String> {
-        if let Some(domain) = self.domain.clone() {
-            return Some(domain.to_string());
-        }
-
-        None
-    }
-
     /// Retrieves the `String` representation of `image_url` `Url` instance
     pub fn image_url_str(&self) -> Option<String> {
         if let Some(image_url) = self.image_url.clone() {
@@ -46,16 +37,28 @@ impl LinkPreview {
     ///
     /// - Document's `<link rel="canonical" /> element's `href` attribute
     /// - OpenGraphTag's image meta tag (`og:image`)
-    pub fn find_first_domain(html: &Html) -> Option<Url> {
+    pub fn find_first_domain(html: &Html) -> Option<String> {
         if let Some(domain) = find_link(html, "canonical") {
-            return Url::parse(&domain).ok();
+            return LinkPreview::domain_from_string(domain);
         }
 
         if let Some(domain) = find_og_tag(html, OpenGraphTag::Url) {
-            return Url::parse(&domain).ok();
+            return LinkPreview::domain_from_string(domain);
         }
 
         None
+    }
+
+    /// Attempts to parse a `Url` from a `String` and then attempts to retrieve
+    /// the `domain` fragment from such `Url` instance.
+    ///
+    /// If either the `Url` is invalid or theres no a domain fragment available
+    /// (the provided `Url` points to an IP instead of a domain), `None` is
+    /// returned.
+    fn domain_from_string(value: String) -> Option<String> {
+        let url = Url::parse(&value).ok()?;
+
+        url.domain().map(|domain| domain.to_string())
     }
 
     /// Attempts to find the description of the page in the following order:
@@ -169,7 +172,7 @@ impl From<Html> for LinkPreview {
 impl From<&Html> for LinkPreview {
     fn from(html: &Html) -> Self {
         let image_url: Option<Url> = LinkPreview::find_first_image_url(html);
-        let domain: Option<Url> = LinkPreview::find_first_domain(html);
+        let domain: Option<String> = LinkPreview::find_first_domain(html);
 
         LinkPreview {
             title: LinkPreview::find_first_title(html),
@@ -186,7 +189,7 @@ impl FromStr for LinkPreview {
     fn from_str(html: &str) -> Result<Self, Self::Err> {
         let html = Html::parse_document(html);
         let image_url: Option<Url> = LinkPreview::find_first_image_url(&html);
-        let domain: Option<Url> = LinkPreview::find_first_domain(&html);
+        let domain: Option<String> = LinkPreview::find_first_domain(&html);
 
         Ok(LinkPreview {
             title: LinkPreview::find_first_title(&html),
@@ -228,10 +231,7 @@ mod tests {
             link_preview.image_url.unwrap().to_string(),
             "https://www.apple.com/ac/structured-data/images/open_graph_logo.png?201809210816"
         );
-        assert_eq!(
-            link_preview.domain.unwrap().to_string(),
-            "https://en.wikipedia.com/"
-        );
+        assert_eq!(link_preview.domain.unwrap().to_string(), "en.wikipedia.com");
     }
 
     #[test]
@@ -248,10 +248,7 @@ mod tests {
             link_preview.image_url.unwrap().to_string(),
             "https://www.apple.com/ac/structured-data/images/open_graph_logo.png?201809210816"
         );
-        assert_eq!(
-            link_preview.domain.unwrap().to_string(),
-            "https://en.wikipedia.com/"
-        );
+        assert_eq!(link_preview.domain.unwrap().to_string(), "en.wikipedia.com");
     }
 
     #[test]
@@ -287,6 +284,6 @@ mod tests {
         let html = html_from_bytes(FULL_FEATURED_HTML).unwrap();
         let domain = LinkPreview::find_first_domain(&html).and_then(|url| Some(url.to_string()));
 
-        assert_eq!(domain.unwrap(), "https://en.wikipedia.com");
+        assert_eq!(domain.unwrap(), "en.wikipedia.com");
     }
 }

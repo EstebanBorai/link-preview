@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add `remove_html_tags`
 
+### Fixed
+- `LinkPreview.domain` is now a `Option<String>` instead of `Option<Url>`
+- Removed `domain_str`
+
+### Fixed
+- `find_first_domain` returns a domain instead of a URL
+- Use `Option<String>` for `LinkPreview.domain` instead of `Option<Url>`
+
 ## [0.0.2] - 2021-08-10
 ### Added
 - `fetch` feature
