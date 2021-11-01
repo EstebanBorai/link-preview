@@ -19,7 +19,7 @@ thiserror = "1.0.29"
 url = "2.2.2"
 
 [dev-dependencies]
-tokio = { version = "1.11.0", features = ["rt", "macros"] }
+tokio = { version = "1.13.0", features = ["rt", "macros"] }
 
 [features]
 # Provide fetch capabilities
