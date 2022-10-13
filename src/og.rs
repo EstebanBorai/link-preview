@@ -11,16 +11,6 @@
 use scraper::{Html, Selector};
 use std::fmt;
 
-#[derive(Debug)]
-pub struct OpenGraph {
-    title: Option<String>,
-    description: Option<String>,
-    url: Option<String>,
-    image: Option<String>,
-    object_type: Option<String>,
-    locale: Option<String>,
-}
-
 /// OpenGraphTag meta tags collection
 pub enum OpenGraphTag {
     /// Represents the "og:title" OpenGraph meta tag.
