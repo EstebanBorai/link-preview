@@ -1,8 +1,8 @@
 [package]
 name = "link-preview"
-version = "0.0.3"
+version = "0.1.0"
 authors = ["Esteban Borai <estebanborai@gmail.com>"]
-edition = "2018"
+edition = "2021"
 description = "Retrieve website metadata such as title, description, preview image, author and more from OpenGraph, Google, Schema.org and Twitter compliant sites"
 keywords = ["link", "schema-org", "open-graph", "website", "metadata"]
 license = "MIT OR Apache-2.0"
